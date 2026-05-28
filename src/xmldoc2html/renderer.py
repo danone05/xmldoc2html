@@ -1,5 +1,5 @@
 from html import escape
-
+from xmldoc2html.syntax_highlighter import SyntaxHighlighter
 from xmldoc2html.model import (
     Bold,
     Code,
@@ -13,17 +13,29 @@ from xmldoc2html.model import (
     Paragraph,
     Section,
     TextNode,
-    Image
+    Image,
+    Member,
+    Summary,
+    Param,
+    Returns,
+    Reference
 )
 '''Превращает внутреннюю модель документа в готовый html код'''
 
 class HtmlRenderer:
+    def __init__(self):
+        self.highlighter = SyntaxHighlighter()
+
     def render(self, document: Document) -> str:
         title = escape(document.title or "Document")
         body_parts: list[str] = []
+        toc = self._render_toc(document)
 
         if document.title:
             body_parts.append(f"<h1>{escape(document.title)}</h1>")
+
+        if toc:
+            body_parts.append(toc)
 
         body_parts.extend(self._render_node(node) for node in document.children)
         body = "\n".join(body_parts)
@@ -35,6 +47,9 @@ class HtmlRenderer:
             "  <meta charset=\"utf-8\">\n"
             "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
             f"  <title>{title}</title>\n"
+            "  <style>\n"
+            "    .kw { color: blue; font-weight: bold; }\n"
+            "  </style>\n"
             "</head>\n"
             "<body>\n"
             f"{body}\n"
@@ -64,13 +79,33 @@ class HtmlRenderer:
             case Italic(children=children):
                 return f"<em>{self._render_inline(children)}</em>"
             case Code(children=children):
-                return f"<code>{self._render_inline(children)}</code>"
+                raw = self._render_inline(children)
+                highlighted = self.highlighter.highlight(raw)
+                return f"<code>{highlighted}</code>"
             case LineBreak():
                 return "<br>"
             case Link(href=href, children=children):
                 return f"<a href=\"{escape(href, quote=True)}\">{self._render_inline(children)}</a>"
             case Image(src=src, alt=alt):
                 return f"<img src=\"{escape(src, quote=True)}\" alt=\"{escape(alt, quote=True)}\">"
+            case Member(name=name, children=children):
+                safe_id = escape(name.replace(":", "-").replace(".", "-"), quote=True)
+                inner = "\n".join(self._render_node(child) for child in children)
+                return f'<section id="{safe_id}" class="member">\n<h2>{escape(name)}</h2>\n{inner}\n</section>'
+            case Summary(children=children):
+                return f'<div class="summary"><strong>Summary:</strong> {self._render_inline(children)}</div>'
+            case Param(name=name, children=children):
+                return f'<div class="param"><strong>{escape(name)}:</strong> {self._render_inline(children)}</div>'
+            case Returns(children=children):
+                return f'<div class="returns"><strong>Returns:</strong> {self._render_inline(children)}</div>'
+            case Reference(cref=cref):
+                safe_id = cref.replace(":", "-").replace(".", "-")
+                text = cref.split(":", 1)[-1]
+
+                return (
+                    f'<a href="#{escape(safe_id, quote=True)}">'
+                    f'{escape(text)}</a>'
+                )
             case _:
                 raise TypeError(f"Unsupported node type: {type(node)!r}")
 
@@ -86,3 +121,29 @@ class HtmlRenderer:
             else:
                 parts.append(rendered)
         return "".join(parts)
+
+    def _render_toc(self, document: Document) -> str:
+        links: list[str] = []
+
+        for node in document.children:
+            if isinstance(node, Member):
+                safe_id = node.name.replace(":", "-").replace(".", "-")
+
+                links.append(
+                    f'<li><a href="#{escape(safe_id, quote=True)}">'
+                    f'{escape(node.name)}</a></li>'
+                )
+
+        if not links:
+            return ""
+
+        items = "\n".join(links)
+
+        return (
+            '<nav class="toc">\n'
+            '<h2>Table of Contents</h2>\n'
+            '<ul>\n'
+            f'{items}\n'
+            '</ul>\n'
+            '</nav>'
+        )

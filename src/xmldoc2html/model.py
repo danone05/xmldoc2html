@@ -69,3 +69,25 @@ class Document:
 class Image(Node):
     src: str
     alt: str = ""
+
+@dataclass(frozen=True)
+class Member(Node):
+    name: str
+    children: list[Node]
+
+@dataclass(frozen=True)
+class Summary(Node):
+    children: list[Node]
+
+@dataclass(frozen=True)
+class Returns(Node):
+    children: list[Node] = field(default_factory=list)
+
+@dataclass(frozen=True)
+class Param(Node):
+    name: str
+    children: list[Node] = field(default_factory=list)
+
+@dataclass(frozen=True)
+class Reference(Node):
+    cref: str

@@ -1,18 +1,16 @@
 from pathlib import Path
-from xml.etree import ElementTree as ET
 
-'''Чтение xml'''
+from xmldoc2html.simple_xml_parser import SimpleXmlParser
+from xmldoc2html.xml_node import XmlNode
+
 
 class XmlParser:
-    def parse_file(self, path: str | Path) -> ET.Element:
-        try:
-            tree = ET.parse(path)
-        except ET.ParseError as exc:
-            raise ValueError(f"Invalid XML: {exc}") from exc
-        return tree.getroot()
+    def parse_file(self, path: str | Path) -> XmlNode:
+        xml = Path(path).read_text(encoding="utf-8")
+        return self.parse_string(xml)
 
-    def parse_string(self, xml: str) -> ET.Element:
+    def parse_string(self, xml: str) -> XmlNode:
         try:
-            return ET.fromstring(xml)
-        except ET.ParseError as exc:
+            return SimpleXmlParser().parse(xml)
+        except Exception as exc:
             raise ValueError(f"Invalid XML: {exc}") from exc

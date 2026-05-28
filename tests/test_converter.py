@@ -124,7 +124,7 @@ def test_strict_mode_fails_on_unsupported_tags():
 
     with pytest.raises(UnsupportedTagError):
         XmlDoc2HtmlConverter(strict=True).convert_string(xml)
-        
+
 def test_converts_images():
     html = convert("""
     <document>
@@ -133,3 +133,121 @@ def test_converts_images():
     """)
 
     assert '<img src="images/logo.png" alt="Logo">' in html
+
+def test_converts_csharp_xml_doc_member():
+    html = convert("""
+    <doc>
+      <members>
+        <member name="T:Demo.Calculator">
+          <summary>Calculator class.</summary>
+          <param name="value">Input value.</param>
+          <returns>Result value.</returns>
+        </member>
+      </members>
+    </doc>
+    """)
+
+    assert "<title>C# Documentation</title>" in html
+    assert 'id="T-Demo-Calculator"' in html
+    assert "T:Demo.Calculator" in html
+    assert "Summary:" in html
+    assert "Calculator class." in html
+    assert "value:" in html
+    assert "Input value." in html
+    assert "Returns:" in html
+    assert "Result value." in html
+
+def test_generates_table_of_contents():
+    html = convert("""
+    <doc>
+      <members>
+        <member name="T:Demo.Calculator">
+          <summary>Calculator class.</summary>
+        </member>
+      </members>
+    </doc>
+    """)
+
+    assert "Table of Contents" in html
+    assert 'href="#T-Demo-Calculator"' in html
+
+def test_converts_cref_links():
+    html = convert("""
+    <doc>
+      <members>
+        <member name="T:Demo.Calculator">
+          <summary>
+            Uses <see cref="T:Demo.Math"/>.
+          </summary>
+        </member>
+      </members>
+    </doc>
+    """)
+
+    assert 'href="#T-Demo-Math"' in html
+    assert "Demo.Math" in html
+
+def test_highlights_code_keywords():
+    html = convert("""
+    <document>
+      <p><code>public class Test</code></p>
+    </document>
+    """)
+
+    assert '<span class="kw">public</span>' in html
+    assert '<span class="kw">class</span>' in html
+from xmldoc2html.project_scanner import ProjectScanner
+
+
+def test_finds_documentation_file_from_csproj(tmp_path):
+    csproj = tmp_path / "Demo.csproj"
+    xml_doc = tmp_path / "bin" / "Debug" / "Demo.xml"
+
+    csproj.write_text(
+        """
+        <Project>
+          <PropertyGroup>
+            <DocumentationFile>bin/Debug/Demo.xml</DocumentationFile>
+          </PropertyGroup>
+        </Project>
+        """,
+        encoding="utf-8",
+    )
+
+    result = ProjectScanner().find_xml_files(csproj)
+
+    assert result == [xml_doc]
+
+def test_finds_xml_files_from_sln(tmp_path):
+    project_dir = tmp_path / "Demo"
+    project_dir.mkdir()
+
+    csproj = project_dir / "Demo.csproj"
+
+    csproj.write_text(
+        """
+        <Project>
+          <PropertyGroup>
+            <DocumentationFile>bin/Debug/Demo.xml</DocumentationFile>
+          </PropertyGroup>
+        </Project>
+        """,
+        encoding="utf-8",
+    )
+
+    sln = tmp_path / "Demo.sln"
+
+    sln.write_text(
+        """
+        Project("{GUID}") = "Demo", "Demo/Demo.csproj", "{GUID}"
+        """,
+        encoding="utf-8",
+    )
+
+    result = ProjectScanner().find_xml_files(sln)
+
+    expected = [
+        project_dir / "bin" / "Debug" / "Demo.xml"
+    ]
+
+    assert result == expected

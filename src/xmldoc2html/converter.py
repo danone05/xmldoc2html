@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from xmldoc2html.project_scanner import ProjectScanner
 from xmldoc2html.mapper import XmlToDocumentMapper
 from xmldoc2html.parser import XmlParser
 from xmldoc2html.renderer import HtmlRenderer
@@ -11,6 +11,7 @@ class XmlDoc2HtmlConverter:
         self.parser = XmlParser()
         self.mapper = XmlToDocumentMapper(strict=strict)
         self.renderer = HtmlRenderer()
+        self.scanner = ProjectScanner()
 
     def convert_string(self, xml: str) -> str:
         root = self.parser.parse_string(xml)
@@ -18,7 +19,14 @@ class XmlDoc2HtmlConverter:
         return self.renderer.render(document)
 
     def convert_file(self, input_path: str | Path, output_path: str | Path) -> None:
-        root = self.parser.parse_file(input_path)
-        document = self.mapper.map_root(root)
-        html = self.renderer.render(document)
+        xml_files = self.scanner.find_xml_files(input_path)
+
+        html_parts: list[str] = []
+
+        for xml_file in xml_files:
+            root = self.parser.parse_file(xml_file)
+            document = self.mapper.map_root(root)
+            html_parts.append(self.renderer.render(document))
+
+        html = "\n".join(html_parts)
         Path(output_path).write_text(html, encoding="utf-8")
