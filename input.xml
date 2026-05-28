@@ -1,0 +1,45 @@
+<document>
+    <title>XML to HTML Demo</title>
+
+    <section>
+        <title>Introduction</title>
+
+        <p>
+            This is a simple <b>XML</b> document converted to
+            <i>HTML</i>.
+        </p>
+
+        <p>
+            Visit
+            <a href="https://example.com">
+                Example Website
+            </a>
+        </p>
+    </section>
+
+    <section>
+        <title>Features</title>
+
+        <ul>
+            <li>Paragraph support</li>
+            <li>Bold and italic text</li>
+            <li>Links</li>
+            <li>Lists</li>
+            <li>sections</li>
+        </ul>
+
+        <section>
+            <title>Example</title>
+
+            <p>
+                Example inline code:
+                <code>print(&quot;Hello World&quot;)</code>
+            </p>
+
+            <p>
+                First line<br/>
+                Second line
+            </p>
+        </section>
+    </section>
+</document>
