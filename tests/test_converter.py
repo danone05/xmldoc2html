@@ -124,3 +124,12 @@ def test_strict_mode_fails_on_unsupported_tags():
 
     with pytest.raises(UnsupportedTagError):
         XmlDoc2HtmlConverter(strict=True).convert_string(xml)
+        
+def test_converts_images():
+    html = convert("""
+    <document>
+      <img src="images/logo.png" alt="Logo"/>
+    </document>
+    """)
+
+    assert '<img src="images/logo.png" alt="Logo">' in html

@@ -64,3 +64,8 @@ class LineBreak(Node):
 class Document:
     title: str | None = None
     children: list[Node] = field(default_factory=list)
+
+@dataclass(frozen=True)
+class Image(Node):
+    src: str
+    alt: str = ""

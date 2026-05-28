@@ -13,6 +13,7 @@ from xmldoc2html.model import (
     Paragraph,
     Section,
     TextNode,
+    Image
 )
 '''Превращает внутреннюю модель документа в готовый html код'''
 
@@ -68,8 +69,11 @@ class HtmlRenderer:
                 return "<br>"
             case Link(href=href, children=children):
                 return f"<a href=\"{escape(href, quote=True)}\">{self._render_inline(children)}</a>"
+            case Image(src=src, alt=alt):
+                return f"<img src=\"{escape(src, quote=True)}\" alt=\"{escape(alt, quote=True)}\">"
             case _:
                 raise TypeError(f"Unsupported node type: {type(node)!r}")
+
 
     def _render_inline(self, nodes: list[Node]) -> str:
         parts: list[str] = []

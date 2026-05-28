@@ -14,6 +14,7 @@ from xmldoc2html.model import (
     Paragraph,
     Section,
     TextNode,
+    Image
 )
 
 '''превращает xml теги во внутренние объекты документа'''
@@ -67,10 +68,18 @@ class XmlToDocumentMapper:
                         continue
                     items.append(self._inline_children(li))
                 return ListBlock(kind=element.tag, items=items)
+            case "img":
+                src = element.attrib.get("src")
+                if not src:
+                    self._handle_unsupported(element)
+                    return None
 
+                alt = element.attrib.get("alt", "")
+                return Image(src=src, alt=alt)
             case _:
                 self._handle_unsupported(element)
                 return None
+
 
     def _inline_children(self, element: Element) -> list[Node]:
         result: list[Node] = []
@@ -89,6 +98,13 @@ class XmlToDocumentMapper:
                 case "a":
                     href = child.attrib.get("href", "#")
                     result.append(Link(href=href, children=self._inline_children(child)))
+                case "img":
+                    src = child.attrib.get("src")
+                    if not src:
+                        self._handle_unsupported(child)
+                    else:
+                        alt = child.attrib.get("alt", "")
+                        result.append(Image(src=src, alt=alt))
                 case _:
                     self._handle_unsupported(child)
 
