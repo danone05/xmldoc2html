@@ -1,7 +1,8 @@
-from xmldoc2html.xml_node import XmlNode
+from xmldoc2html.xml.xml_node import XmlNode
 
-from xmldoc2html.exceptions import UnsupportedTagError
-from xmldoc2html.model import (
+from xmldoc2html.core.exceptions import UnsupportedTagError
+
+from xmldoc2html.core.model import (
     Bold,
     Code,
     Document,
@@ -19,7 +20,7 @@ from xmldoc2html.model import (
     Summary,
     Param,
     Returns,
-    Reference
+    Reference,
 )
 
 
@@ -169,7 +170,7 @@ class XmlToDocumentMapper:
                 case "i" | "em":
                     result.append(Italic(children=self._inline_children(child)))
 
-                case "code":
+                case "c" | "code":
                     result.append(Code(children=self._inline_children(child)))
 
                 case "br":
@@ -191,6 +192,7 @@ class XmlToDocumentMapper:
                     else:
                         alt = child.attrs.get("alt", "")
                         result.append(Image(src=src, alt=alt))
+
                 case "see":
                     cref = child.attrs.get("cref")
 
@@ -199,6 +201,8 @@ class XmlToDocumentMapper:
 
                 case _:
                     self._handle_unsupported(child)
+
+            self._append_text(result, child.tail)
 
         return result
 

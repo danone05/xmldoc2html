@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from xmldoc2html.simple_xml_parser import SimpleXmlParser
-from xmldoc2html.xml_node import XmlNode
+from xmldoc2html.xml.simple_xml_parser import SimpleXmlParser
+from xmldoc2html.xml.xml_node import XmlNode
 
 
 class XmlParser:

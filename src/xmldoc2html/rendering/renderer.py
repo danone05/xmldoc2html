@@ -1,6 +1,6 @@
 from html import escape
-from xmldoc2html.syntax_highlighter import SyntaxHighlighter
-from xmldoc2html.model import (
+from xmldoc2html.rendering.syntax_highlighter import SyntaxHighlighter
+from xmldoc2html.core.model import (
     Bold,
     Code,
     Document,
@@ -18,7 +18,8 @@ from xmldoc2html.model import (
     Summary,
     Param,
     Returns,
-    Reference
+    Reference,
+
 )
 '''Превращает внутреннюю модель документа в готовый html код'''
 
@@ -115,6 +116,8 @@ class HtmlRenderer:
         for node in nodes:
             rendered = self._render_node(node)
             if isinstance(node, LineBreak):
+                parts.append(rendered)
+            elif rendered in {".", ",", ";", ":", "!", "?"}:
                 parts.append(rendered)
             elif parts and not parts[-1].endswith((" ", "<br>")):
                 parts.append(" " + rendered)

@@ -1,8 +1,8 @@
 from pathlib import Path
-from xmldoc2html.project_scanner import ProjectScanner
-from xmldoc2html.mapper import XmlToDocumentMapper
-from xmldoc2html.parser import XmlParser
-from xmldoc2html.renderer import HtmlRenderer
+from xmldoc2html.input.project_scanner import ProjectScanner
+from xmldoc2html.mapping.mapper import XmlToDocumentMapper
+from xmldoc2html.xml.parser import XmlParser
+from xmldoc2html.rendering.renderer import HtmlRenderer
 
 '''Соединение parser, mapper и renderer в один pipeline'''
 

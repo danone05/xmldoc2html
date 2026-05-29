@@ -1,28 +1,17 @@
 <doc>
+
     <members>
+
         <member name="T:Demo.Calculator">
+
             <summary>
+
                 Calculator class uses <see cref="T:Demo.Math"/>.
-            </summary>
-        </member>
 
-        <member name="T:Demo.Math">
-            <summary>
-                Math helper class.
-            </summary>
-        </member>
-
-        <member name="M:Demo.Calculator.Add">
-            <summary>
-                Adds two numbers using <c>public int Add</c>.
             </summary>
 
-            <param name="a">First number.</param>
-            <param name="b">Second number.</param>
-
-            <returns>
-                Sum result. Example: <code>return a + b;</code>
-            </returns>
         </member>
+
     </members>
+
 </doc>

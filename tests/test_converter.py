@@ -1,7 +1,7 @@
 import pytest
 
 from xmldoc2html.converter import XmlDoc2HtmlConverter
-from xmldoc2html.exceptions import UnsupportedTagError
+from xmldoc2html.core.exceptions import UnsupportedTagError
 
 
 def convert(xml: str) -> str:
@@ -196,7 +196,7 @@ def test_highlights_code_keywords():
 
     assert '<span class="kw">public</span>' in html
     assert '<span class="kw">class</span>' in html
-from xmldoc2html.project_scanner import ProjectScanner
+from xmldoc2html.input.project_scanner import ProjectScanner
 
 
 def test_finds_documentation_file_from_csproj(tmp_path):
